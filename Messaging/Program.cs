@@ -1,4 +1,5 @@
 using MassTransit;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Messaging;
 
@@ -7,8 +8,6 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        builder.Services.AddAuthorization();
 
         builder.Services.AddOpenApi();
         builder.Services.AddSwaggerUI();
@@ -35,27 +34,20 @@ public class Program
             app.MapSwaggerUI();
         }
 
-        app.UseAuthorization();
-
-        var summaries = new[]
+        app.MapPost("/produce", async (int orderId, [FromServices] ISendEndpointProvider sendEndpointProvider) =>
         {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+            var endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri("queue:order-queue"));
 
-        app.MapGet("/weatherforecast", (HttpContext httpContext) =>
-        {
-            var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                {
-                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    TemperatureC = Random.Shared.Next(-20, 55),
-                    Summary = summaries[Random.Shared.Next(summaries.Length)]
-                })
-                .ToArray();
-            return forecast;
-        })
-        .WithName("GetWeatherForecast");
+            await endpoint.Send(new SubmitOrder { OrderId = orderId });
+
+            return Results.Created();
+        });
 
         app.Run();
+    }
+
+    public record SubmitOrder
+    {
+        public int OrderId { get; init; }
     }
 }
