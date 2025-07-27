@@ -21,6 +21,11 @@ public class Program
         {
             x.AddConsumer<SubmitOrderConsumer>();
 
+            x.AddEntityFrameworkOutbox<DbContext>(o =>
+            {
+                o.UseSqlServer();
+            });
+
             x.UsingRabbitMq((context, cfg) =>
             {
                 cfg.Host("localhost", "/", h =>
@@ -30,11 +35,6 @@ public class Program
                 });
 
                 cfg.ConfigureEndpoints(context);
-
-                cfg.ReceiveEndpoint(SubmitOrder.QueueName, e =>
-                {
-                    e.ConfigureConsumer<SubmitOrderConsumer>(context);
-                });
             });
         });
 
