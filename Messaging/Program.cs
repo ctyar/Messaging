@@ -1,5 +1,4 @@
 using MassTransit;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Messaging;
 
@@ -11,6 +10,12 @@ public class Program
 
         builder.Services.AddOpenApi();
         builder.Services.AddSwaggerUI();
+
+        builder.Services.AddDbContext<DbContext>();
+        using (var context = new DbContext())
+        {
+            context.Database.EnsureCreated();
+        }
 
         builder.Services.AddMassTransit(x =>
         {
@@ -34,20 +39,9 @@ public class Program
             app.MapSwaggerUI();
         }
 
-        app.MapPost("/produce", async (int orderId, [FromServices] ISendEndpointProvider sendEndpointProvider) =>
-        {
-            var endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri("queue:order-queue"));
-
-            await endpoint.Send(new SubmitOrder { OrderId = orderId });
-
-            return Results.Created();
-        });
+        OrderEndpoints.Map(app);
+        MassTransitEndpoints.Map(app);
 
         app.Run();
-    }
-
-    public record SubmitOrder
-    {
-        public int OrderId { get; init; }
     }
 }
