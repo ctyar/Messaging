@@ -12,5 +12,5 @@ public class DbContext : Microsoft.EntityFrameworkCore.DbContext
 
 public sealed class Order
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 }

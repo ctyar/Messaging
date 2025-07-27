@@ -11,15 +11,16 @@ public static class MassTransitEndpoints
             .Produces(StatusCodes.Status201Created);
     }
 
-    private static async Task<IResult> CreateAsync(int orderId, [FromServices] ISendEndpointProvider sendEndpointProvider,
+    private static async Task<IResult> CreateAsync([FromServices] ISendEndpointProvider sendEndpointProvider,
         [FromServices] DbContext dbContext, CancellationToken cancellationToken)
     {
-        dbContext.Orders.Add(new Order { Id = orderId });
+        var order = new Order { Id = Guid.NewGuid() };
+        dbContext.Orders.Add(order);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri("queue:order-queue"));
+        var endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{SubmitOrder.QueueName}"));
 
-        await endpoint.Send(new SubmitOrder { OrderId = orderId }, cancellationToken);
+        await endpoint.Send(new SubmitOrder { OrderId = order.Id }, cancellationToken);
 
         return Results.Created();
     }
@@ -27,5 +28,7 @@ public static class MassTransitEndpoints
 
 public record SubmitOrder
 {
-    public int OrderId { get; init; }
+    public static readonly string QueueName = "order-queue";
+
+    public Guid OrderId { get; init; }
 }
