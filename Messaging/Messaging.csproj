@@ -8,9 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.1" />
     <PackageReference Include="SwaggerUI.OpenApi" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.1" />
+    <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.5.1" />
+    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.3.5" />
+    <PackageReference Include="DotNetCore.CAP.Sqlite" Version="8.3.4" />
   </ItemGroup>
 
 </Project>

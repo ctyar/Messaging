@@ -1,7 +1,7 @@
 ﻿using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Messaging;
+namespace Messaging.MassTransit;
 
 public static class MassTransitEndpoints
 {
@@ -23,11 +23,4 @@ public static class MassTransitEndpoints
 
         return Results.Created();
     }
-}
-
-public record SubmitOrder
-{
-    public static readonly string QueueName = "order-queue";
-
-    public Guid OrderId { get; init; }
 }

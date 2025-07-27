@@ -1,6 +1,6 @@
 ﻿using MassTransit;
 
-namespace Messaging;
+namespace Messaging.MassTransit;
 
 public class SubmitOrderConsumer : IConsumer<SubmitOrder>
 {
