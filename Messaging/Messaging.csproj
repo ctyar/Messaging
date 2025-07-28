@@ -14,9 +14,6 @@
     <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.5.1" />
     <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.3.5" />
     <PackageReference Include="DotNetCore.CAP.Sqlite" Version="8.3.4" />
-    <PackageReference Include="Rebus" Version="8.8.0" />
-    <PackageReference Include="Rebus.ServiceProvider" Version="10.5.0" />
-    <PackageReference Include="Rebus.RabbitMq" Version="10.0.1" />
   </ItemGroup>
 
 </Project>

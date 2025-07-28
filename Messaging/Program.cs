@@ -2,7 +2,6 @@ using DotNetCore.CAP;
 using MassTransit;
 using Messaging.Cap;
 using Messaging.MassTransit;
-using Rebus.Config;
 
 namespace Messaging;
 
@@ -23,7 +22,6 @@ public class Program
 
         AddMassTransit(builder);
         AddCap(builder);
-        AddRebus(builder);
 
         var app = builder.Build();
 
@@ -38,14 +36,6 @@ public class Program
         CapEndpoints.Map(app);
 
         app.Run();
-    }
-
-    private static void AddRebus(WebApplicationBuilder builder)
-    {
-        builder.Services.AddRebus(
-            configure => configure
-                .Transport(t => t.UseRabbitMq("Host=localhost", "RebusQueue"))
-        );
     }
 
     private static void AddCap(WebApplicationBuilder builder)

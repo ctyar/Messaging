@@ -2,7 +2,6 @@
 
 + https://github.com/MassTransit/MassTransit
 + https://github.com/dotnetcore/cap
-+ https://github.com/rebus-org/rebus
 + https://github.com/brightercommand/brighter
 + https://github.com/foundatiofx/foundatio
 + https://github.com/particular/nservicebus
