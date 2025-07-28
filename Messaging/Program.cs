@@ -1,4 +1,5 @@
 using DotNetCore.CAP;
+using EasyNetQ;
 using MassTransit;
 using Messaging.Cap;
 using Messaging.EasyNetQ;
@@ -21,9 +22,10 @@ public class Program
             context.Database.EnsureCreated();
         }
 
-        AddMassTransit(builder);
-        AddCap(builder);
-        builder.Services.AddHostedService<WorkerSubscriber>();
+        //AddMassTransit(builder);
+        //AddCap(builder);
+        AddEasyNetQ(builder);
+
 
         var app = builder.Build();
 
@@ -34,11 +36,18 @@ public class Program
         }
 
         OrderEndpoints.Map(app);
-        MassTransitEndpoints.Map(app);
-        CapEndpoints.Map(app);
+        //MassTransitEndpoints.Map(app);
+        //CapEndpoints.Map(app);
         EasyNetQEndpoints.Map(app);
 
         app.Run();
+    }
+
+    private static void AddEasyNetQ(WebApplicationBuilder builder)
+    {
+        builder.Services.AddEasyNetQ("host=localhost");
+
+        builder.Services.AddHostedService<WorkerSubscriber>();
     }
 
     private static void AddCap(WebApplicationBuilder builder)

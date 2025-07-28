@@ -4,24 +4,18 @@ namespace Messaging.EasyNetQ;
 
 public class WorkerSubscriber : BackgroundService
 {
+    private readonly IBus _bus;
     private readonly ILogger<WorkerSubscriber> _logger;
 
-    public WorkerSubscriber(ILogger<WorkerSubscriber> logger)
+    public WorkerSubscriber(IBus bus, ILogger<WorkerSubscriber> logger)
     {
+        _bus = bus;
         _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var c = new ConnectionConfiguration();
-        c.Hosts.Add(new HostConfiguration
-        {
-            Host = "localhost",
-        });
-
-        var bus = RabbitHutch.CreateBus(c, o => { });
-
-        await bus.PubSub.SubscribeAsync<SubmitOrder>("my_subscription_id",
+        await _bus.PubSub.SubscribeAsync<SubmitOrder>("my_subscription_id",
             msg => _logger.LogInformation("Received order message: {MessageId}", msg.OrderId),
             stoppingToken
         );

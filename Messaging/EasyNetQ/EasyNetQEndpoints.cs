@@ -1,5 +1,4 @@
-﻿using DotNetCore.CAP;
-using EasyNetQ;
+﻿using EasyNetQ;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Messaging.EasyNetQ;
@@ -12,7 +11,7 @@ public static class EasyNetQEndpoints
             .Produces(StatusCodes.Status201Created);
     }
 
-    private static async Task<IResult> CreateAsync([FromServices] ICapPublisher capPublisher,
+    private static async Task<IResult> CreateAsync([FromServices] IBus bus,
         [FromServices] DbContext dbContext, CancellationToken cancellationToken)
     {
         var order = new Order { Id = Guid.NewGuid() };
@@ -20,7 +19,6 @@ public static class EasyNetQEndpoints
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var bus = RabbitHutch.CreateBus("host=localhost");
         await bus.PubSub.PublishAsync(new SubmitOrder { OrderId = order.Id }, cancellationToken);
 
         return Results.Created();
