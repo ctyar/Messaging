@@ -1,13 +1,14 @@
 ﻿using DotNetCore.CAP;
+using EasyNetQ;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Messaging.Cap;
+namespace Messaging.EasyNetQ;
 
-public static class CapEndpoints
+public static class EasyNetQEndpoints
 {
     public static void Map(WebApplication app)
     {
-        app.MapPost("cap", CreateAsync)
+        app.MapPost("easynetq", CreateAsync)
             .Produces(StatusCodes.Status201Created);
     }
 
@@ -17,12 +18,10 @@ public static class CapEndpoints
         var order = new Order { Id = Guid.NewGuid() };
         dbContext.Orders.Add(order);
 
-        using (var trans = dbContext.Database.BeginTransaction(capPublisher, autoCommit: true))
-        {
-            await dbContext.SaveChangesAsync(cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
 
-            capPublisher.Publish("orders", new SubmitOrder { OrderId = order.Id });
-        }
+        var bus = RabbitHutch.CreateBus("host=localhost");
+        await bus.PubSub.PublishAsync(new SubmitOrder { OrderId = order.Id }, cancellationToken);
 
         return Results.Created();
     }
