@@ -2,6 +2,13 @@ using DotNetCore.CAP;
 using MassTransit;
 using Messaging.Cap;
 using Messaging.MassTransit;
+using Paramore.Brighter;
+using Paramore.Brighter.Extensions.DependencyInjection;
+using Paramore.Brighter.Extensions.Hosting;
+using Paramore.Brighter.MessagingGateway.RMQ;
+using Paramore.Brighter.Outbox.Sqlite;
+using Paramore.Brighter.Sqlite;
+using Paramore.Brighter.Sqlite.EntityFrameworkCore;
 
 namespace Messaging;
 
@@ -20,8 +27,9 @@ public class Program
             context.Database.EnsureCreated();
         }
 
-        AddMassTransit(builder);
-        AddCap(builder);
+        //AddMassTransit(builder);
+        //AddCap(builder);
+        AddBrighter(builder);
 
         var app = builder.Build();
 
@@ -32,10 +40,34 @@ public class Program
         }
 
         OrderEndpoints.Map(app);
-        MassTransitEndpoints.Map(app);
-        CapEndpoints.Map(app);
+        //MassTransitEndpoints.Map(app);
+        //CapEndpoints.Map(app);
 
         app.Run();
+    }
+
+    private static void AddBrighter(WebApplicationBuilder builder)
+    {
+        builder.Services
+            .AddBrighter()
+            .UseExternalBus(new RmqProducerRegistryFactory(
+                    new RmqMessagingGatewayConnection
+                    {
+                        AmpqUri = new AmqpUriSpecification(new Uri("amqp://guest:guest@localhost:5672")),
+                        Exchange = new Exchange("paramore.brighter.exchange"),
+                    },
+                    [
+                        new RmqPublication
+                        {
+                            Topic = new RoutingKey("GreetingMade"),
+                            MakeChannels = OnMissingChannel.Create
+                        }
+                    ]
+                ).Create()
+            )
+            .UseSqliteOutbox(new SqliteConfiguration("Data Source=Database.db"), typeof(SqliteConnectionProvider), ServiceLifetime.Singleton)
+            .UseSqliteTransactionConnectionProvider(typeof(SqliteEntityFrameworkConnectionProvider<DbContext>), ServiceLifetime.Scoped)
+            .UseOutboxSweeper();
     }
 
     private static void AddCap(WebApplicationBuilder builder)
